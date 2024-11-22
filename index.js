@@ -12,12 +12,13 @@ var userIsAuthorised = false;
 app.use(bodyParser.urlencoded({ extended: true }));
 
 function passwordCheck(req, res, next) {
-  const password = req.body["password"];
-  if (password === "ILoveProgramming") {
-    userIsAuthorised = true;
+    const password = req.body["password"];
+    if (password === "ILoveProgramming") {
+      req.userIsAuthorized = true; // Attach authorization to the request object
+    }
+    next();
   }
-  next();
-}
+
 app.use(passwordCheck);
 
 app.get("/", (req, res) => {
@@ -25,13 +26,12 @@ app.get("/", (req, res) => {
 });
 
 app.post("/check", (req, res) => {
-  if (userIsAuthorised) {
-    res.sendFile(__dirname + "/public/secret.html");
-  } else {
-    res.sendFile(__dirname + "/public/index.html");
-    //Alternatively res.redirect("/");
-  }
-});
+    if (req.userIsAuthorized) {
+      res.sendFile(__dirname + "/public/secret.html");
+    } else {
+      res.redirect("/"); // Redirect to the home page on failure
+    }
+  });
 
 app.listen(port, () => {
   console.log(`Listening on port ${port}`);
